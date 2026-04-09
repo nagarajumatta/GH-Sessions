@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Copilot — Premium Requests &amp; Models</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --accent: #6366f1;
+    --accent-light: #818cf8;
+    --bg-dark: #0f0f1a;
+    --bg-card: rgba(255,255,255,0.04);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --gradient-1: linear-gradient(135deg, #6366f1, #a855f7);
+    --gradient-2: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
+    --gradient-4: linear-gradient(135deg, #10b981, #3b82f6);
+    --gradient-5: linear-gradient(135deg, #ec4899, #8b5cf6);
+  }
+
+  html, body {
+    height: 100%; width: 100%;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── Animated background ── */
+  .bg-orbs {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  }
+  .bg-orbs span {
+    position: absolute; border-radius: 50%; filter: blur(120px); opacity: .18;
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+  .bg-orbs span:nth-child(1){ width:600px;height:600px;background:#6366f1;top:-10%;left:-5%; }
+  .bg-orbs span:nth-child(2){ width:500px;height:500px;background:#a855f7;bottom:-10%;right:-5%;animation-delay:-7s; }
+  .bg-orbs span:nth-child(3){ width:400px;height:400px;background:#3b82f6;top:40%;left:50%;animation-delay:-13s; }
+  @keyframes drift {
+    0%  { transform: translate(0,0) scale(1); }
+    100%{ transform: translate(60px,40px) scale(1.15); }
+  }
+
+  /* ── Slide wrapper ── */
+  .deck {
+    position: relative; width: 100%; height: 100%; z-index: 1;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 60px 80px;
+    opacity: 0; visibility: hidden;
+    transition: opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1);
+    transform: translateY(30px) scale(.97);
+  }
+  .slide.active {
+    opacity: 1; visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  /* ── Typography ── */
+  .badge {
+    display: inline-block;
+    padding: 6px 18px; border-radius: 999px;
+    font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    background: rgba(99,102,241,.15); color: var(--accent-light);
+    margin-bottom: 24px;
+  }
+  .slide h1 {
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-weight: 800; line-height: 1.1;
+    background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 20px; text-align: center;
+  }
+  .slide h2 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 700; line-height: 1.15;
+    margin-bottom: 16px; text-align: center;
+  }
+  .slide .subtitle {
+    font-size: 1.15rem; color: var(--text-dim); max-width: 640px;
+    text-align: center; line-height: 1.7; margin-bottom: 40px;
+  }
+
+  /* ── Card grid (title slide) ── */
+  .agenda-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+    max-width: 960px; width: 100%; margin-top: 12px;
+  }
+  .agenda-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 18px; padding: 36px 28px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    transition: transform .3s, box-shadow .3s, border-color .3s;
+    cursor: default;
+  }
+  .agenda-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(99,102,241,.15);
+    border-color: rgba(99,102,241,.25);
+  }
+  .agenda-card .icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: grid; place-items: center;
+    margin: 0 auto 18px; font-size: 1.6rem;
+  }
+  .agenda-card:nth-child(1) .icon { background: var(--gradient-1); }
+  .agenda-card:nth-child(2) .icon { background: var(--gradient-2); }
+  .agenda-card:nth-child(3) .icon { background: var(--gradient-4); }
+  .agenda-card h3 {
+    font-size: 1.05rem; font-weight: 600; margin-bottom: 8px;
+  }
+  .agenda-card p {
+    font-size: .85rem; color: var(--text-dim); line-height: 1.55;
+  }
+
+  /* ── Content slides ── */
+  .content-wrap {
+    display: flex; gap: 48px; align-items: flex-start;
+    max-width: 1060px; width: 100%; margin-top: 8px;
+  }
+  .content-left { flex: 1; }
+  .content-right {
+    flex: 1; background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 18px; padding: 32px; backdrop-filter: blur(12px);
+    position: relative; overflow: hidden;
+  }
+  .content-right::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 18px 18px 0 0;
+  }
+  .slide[data-index="2"] .content-right::before { background: var(--gradient-1); }
+  .slide[data-index="3"] .content-right::before { background: var(--gradient-2); }
+  .slide[data-index="4"] .content-right::before { background: var(--gradient-4); }
+
+  .feature-list { list-style: none; }
+  .feature-list li {
+    position: relative; padding: 12px 0 12px 32px;
+    font-size: .95rem; line-height: 1.6; color: var(--text-dim);
+    border-bottom: 1px solid rgba(255,255,255,.04);
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li::before {
+    content: '✦'; position: absolute; left: 0; top: 12px;
+    font-size: .8rem; color: var(--accent-light);
+  }
+  .feature-list li strong { color: var(--text); font-weight: 600; }
+
+  .code-block {
+    background: rgba(0,0,0,.35); border-radius: 12px;
+    padding: 20px 24px; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: .82rem; line-height: 1.8; color: #c4b5fd;
+    overflow-x: auto; margin-top: 8px;
+    border: 1px solid rgba(255,255,255,.05);
+  }
+  .code-block .comm { color: #64748b; }
+  .code-block .key  { color: #6ee7b7; }
+  .code-block .val  { color: #fbbf24; }
+  .code-block .tag  { color: #93c5fd; }
+  .code-block .hi   { color: #f472b6; }
+
+  /* ── Model table ── */
+  .model-table {
+    width: 100%; border-collapse: collapse; margin-top: 8px;
+    font-size: .82rem;
+  }
+  .model-table th {
+    text-align: left; padding: 10px 14px;
+    font-weight: 600; font-size: .72rem;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--accent-light);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .model-table td {
+    padding: 10px 14px; color: var(--text-dim);
+    border-bottom: 1px solid rgba(255,255,255,.03);
+  }
+  .model-table tr:last-child td { border-bottom: none; }
+  .model-table .model-name { color: var(--text); font-weight: 600; }
+  .multiplier {
+    display: inline-block; padding: 2px 10px; border-radius: 6px;
+    font-weight: 700; font-size: .78rem;
+  }
+  .mx-low  { background: rgba(16,185,129,.12); color: #6ee7b7; }
+  .mx-med  { background: rgba(251,191,36,.12); color: #fbbf24; }
+  .mx-high { background: rgba(239,68,68,.12); color: #f87171; }
+
+  /* ── Closing slide ── */
+  .closing h1 {
+    font-size: clamp(2.8rem, 5.5vw, 5rem);
+    background: var(--gradient-3); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 18px;
+  }
+  .closing .subtitle { max-width: 500px; }
+
+  /* ── Navigation ── */
+  .nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(15,15,26,.75); backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .nav-bar button {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px; border: none; border-radius: 10px;
+    font-family: inherit; font-size: .88rem; font-weight: 600;
+    cursor: pointer; transition: background .25s, transform .15s, opacity .25s;
+  }
+  .nav-bar button:active { transform: scale(.96); }
+  .btn-prev {
+    background: rgba(255,255,255,.08); color: var(--text);
+  }
+  .btn-prev:hover { background: rgba(255,255,255,.14); }
+  .btn-next {
+    background: var(--gradient-1); color: #fff;
+    box-shadow: 0 4px 20px rgba(99,102,241,.35);
+  }
+  .btn-next:hover { filter: brightness(1.1); }
+  .btn-prev:disabled, .btn-next:disabled {
+    opacity: .3; pointer-events: none;
+  }
+
+  /* progress dots */
+  .dots { display: flex; gap: 10px; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    transition: background .3s, transform .3s, box-shadow .3s;
+    cursor: pointer;
+  }
+  .dot.active {
+    background: var(--accent-light);
+    transform: scale(1.25);
+    box-shadow: 0 0 10px rgba(99,102,241,.5);
+  }
+
+  /* slide counter */
+  .counter { font-size: .82rem; color: var(--text-dim); font-weight: 500; min-width: 60px; text-align: center; }
+
+  /* ── Responsive ── */
+  @media (max-width: 820px) {
+    .agenda-grid { grid-template-columns: 1fr; max-width: 380px; }
+    .content-wrap { flex-direction: column; }
+    .slide { padding: 40px 28px 100px; }
+    .nav-bar { padding: 14px 20px; }
+  }
+
+  /* ── Keyboard hint ── */
+  .key-hint {
+    position: fixed; top: 18px; right: 24px; z-index: 10;
+    font-size: .72rem; color: var(--text-dim); opacity: .5;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .key-hint kbd {
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
+    font-family: inherit; font-size: .7rem;
+  }
+
+  /* slide number badge */
+  .slide-num {
+    position: absolute; top: 32px; left: 40px;
+    font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+    color: rgba(255,255,255,.12);
+  }
+
+  /* ── Intro / Speaker slide ── */
+  .intro-card {
+    display: flex; align-items: center; gap: 56px;
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 24px; padding: 52px 60px;
+    backdrop-filter: blur(14px);
+    max-width: 820px; width: 100%;
+    position: relative; overflow: hidden;
+  }
+  .intro-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: var(--gradient-1); border-radius: 24px 24px 0 0;
+  }
+  .avatar-ring {
+    flex-shrink: 0;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    padding: 4px;
+    background: var(--gradient-1);
+    box-shadow: 0 0 40px rgba(99,102,241,.3);
+  }
+  .avatar-ring img {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    background: var(--bg-dark);
+  }
+  .speaker-info { text-align: left; }
+  .speaker-info h2 {
+    font-size: 2.2rem; font-weight: 800; text-align: left;
+    background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .speaker-info .role {
+    font-size: 1.1rem; color: var(--accent-light); font-weight: 500;
+    margin-bottom: 20px;
+  }
+  .speaker-info .tagline {
+    font-size: .92rem; color: var(--text-dim); line-height: 1.65;
+    max-width: 380px;
+  }
+  .speaker-socials {
+    display: flex; gap: 12px; margin-top: 20px;
+  }
+  .speaker-socials span {
+    padding: 6px 16px; border-radius: 8px;
+    background: rgba(255,255,255,.06); font-size: .78rem;
+    color: var(--text-dim); font-weight: 500;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  @media (max-width: 820px) {
+    .intro-card { flex-direction: column; padding: 40px 32px; gap: 28px; text-align: center; }
+    .speaker-info { text-align: center; }
+    .speaker-info h2 { text-align: center; }
+    .speaker-socials { justify-content: center; }
+    .avatar-ring { width: 140px; height: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs"><span></span><span></span><span></span></div>
+
+<div class="key-hint"><kbd>←</kbd> <kbd>→</kbd> to navigate</div>
+
+<!-- ===== SLIDES ===== -->
+<div class="deck">
+
+  <!-- Slide 0 — Intro / Speaker -->
+  <section class="slide active" data-index="0">
+    <span class="badge">Presented By</span>
+    <div class="intro-card">
+      <div class="avatar-ring">
+        <img src="WalPic.png" alt="Nagaraju Matta">
+      </div>
+      <div class="speaker-info">
+        <h2>Nagaraju Matta</h2>
+        <div class="role">Customer Success Architect</div>
+        <div class="tagline">Empowering developers &amp; teams to unlock the full potential of GitHub Copilot through hands-on guidance &amp; best practices.</div>
+        <div class="speaker-socials">
+          <span>Microsoft</span>
+          <span>GitHub Copilot</span>
+          <span>AI + DevEx</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 1 — Title / Agenda -->
+  <section class="slide" data-index="1">
+    <span class="badge">Session Agenda</span>
+    <h1>Premium Requests<br>&amp; Models</h1>
+    <p class="subtitle">Understand how premium requests work, explore the available AI models, and learn how usage &amp; multipliers impact your Copilot plan.</p>
+    <div class="agenda-grid">
+      <div class="agenda-card">
+        <div class="icon">⚡</div>
+        <h3>Premium Requests</h3>
+        <p>What counts as a premium request, quotas, and how they're consumed.</p>
+      </div>
+      <div class="agenda-card">
+        <div class="icon">🧠</div>
+        <h3>Available Models</h3>
+        <p>Compare GPT-4o, Claude, Gemini &amp; more — capabilities &amp; trade-offs.</p>
+      </div>
+      <div class="agenda-card">
+        <div class="icon">📊</div>
+        <h3>Usage &amp; Multipliers</h3>
+        <p>Model multipliers, billing tiers, and strategies to optimise consumption.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 2 — Premium Requests -->
+  <section class="slide" data-index="2">
+    <span class="slide-num">01</span>
+    <span class="badge">Topic 1</span>
+    <h2>Premium Requests</h2>
+    <p class="subtitle">Every interaction with advanced models or agent features consumes premium requests from your plan's monthly quota.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>What counts as premium</strong> — chat, inline completions with premium models, and agent-mode actions each consume requests.</li>
+          <li><strong>Monthly quotas</strong> — Individual plan includes 300/month; Business &amp; Enterprise get larger pools per seat.</li>
+          <li><strong>Unlimited base model</strong> — GPT-4o mini completions and chat remain unlimited and don't consume premium quota.</li>
+          <li><strong>Overage options</strong> — organisations can enable pay-as-you-go overflow or set hard caps to control spend.</li>
+          <li><strong>Reset cycle</strong> — quotas reset on your billing anniversary date each month; unused requests do not roll over.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div class="code-block">
+<span class="comm"># Premium Request Breakdown</span>
+
+<span class="tag">Plan</span>          <span class="key">│</span> <span class="tag">Monthly Quota</span>
+<span class="key">──────────────┼───────────────</span>
+<span class="val">Free</span>          <span class="key">│</span> <span class="val">2,000 completions</span>
+              <span class="key">│</span> <span class="val">50 chat messages</span>
+<span class="val">Pro</span>           <span class="key">│</span> <span class="val">Unlimited completions</span>
+              <span class="key">│</span> <span class="val">Unlimited chat</span>
+<span class="val">Pro+</span>          <span class="key">│</span> <span class="val">1,500 premium</span>
+<span class="val">Business</span>      <span class="key">│</span> <span class="val">300 premium/seat</span>
+<span class="val">Enterprise</span>    <span class="key">│</span> <span class="val">1,000 premium/seat</span>
+
+<span class="comm"># Premium features include:</span>
+<span class="hi">→</span> Agent mode actions
+<span class="hi">→</span> Premium model chat &amp; edits
+<span class="hi">→</span> MCP tool calls
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3 — Available Models -->
+  <section class="slide" data-index="3">
+    <span class="slide-num">02</span>
+    <span class="badge">Topic 2</span>
+    <h2>Available Models</h2>
+    <p class="subtitle">GitHub Copilot supports a multi-model ecosystem — choose the right model for your task.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>GPT-4.1</strong> — coding-optimised model with strong instruction following and long-context support up to 1M tokens.</li>
+          <li><strong>Claude Sonnet 4</strong> — excels at nuanced reasoning, refactoring, and multi-file edits with deep code understanding.</li>
+          <li><strong>Gemini 2.5 Pro</strong> — Google's advanced model with 1M token context and strong multi-modal capabilities.</li>
+          <li><strong>o3 &amp; o4-mini</strong> — OpenAI's reasoning models ideal for complex algorithmic &amp; architectural challenges.</li>
+          <li><strong>Model picker</strong> — switch models per-conversation in VS Code via the model selector in chat.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <table class="model-table">
+          <thead>
+            <tr><th>Model</th><th>Best For</th><th>Multiplier</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="model-name">GPT-4o</td>
+              <td>General coding &amp; chat</td>
+              <td><span class="multiplier mx-low">1×</span></td>
+            </tr>
+            <tr>
+              <td class="model-name">GPT-4.1</td>
+              <td>Complex code generation</td>
+              <td><span class="multiplier mx-low">1×</span></td>
+            </tr>
+            <tr>
+              <td class="model-name">Claude Sonnet 4</td>
+              <td>Refactoring &amp; reasoning</td>
+              <td><span class="multiplier mx-low">1×</span></td>
+            </tr>
+            <tr>
+              <td class="model-name">Gemini 2.5 Pro</td>
+              <td>Long-context analysis</td>
+              <td><span class="multiplier mx-med">2×</span></td>
+            </tr>
+            <tr>
+              <td class="model-name">o3</td>
+              <td>Deep reasoning</td>
+              <td><span class="multiplier mx-high">4×</span></td>
+            </tr>
+            <tr>
+              <td class="model-name">o4-mini</td>
+              <td>Fast reasoning</td>
+              <td><span class="multiplier mx-low">1×</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4 — Usage & Multipliers -->
+  <section class="slide" data-index="4">
+    <span class="slide-num">03</span>
+    <span class="badge">Topic 3</span>
+    <h2>Usage &amp; Multipliers</h2>
+    <p class="subtitle">Different models consume your premium quota at different rates — plan strategically for maximum value.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>Multiplier system</strong> — each model has a cost multiplier (1× to 8×) that determines how many premium requests a single interaction consumes.</li>
+          <li><strong>Smart defaults</strong> — Copilot auto-selects the most efficient model for routine tasks, preserving your premium quota.</li>
+          <li><strong>Usage dashboard</strong> — monitor real-time consumption in GitHub Settings → Copilot → Usage to track burn rate.</li>
+          <li><strong>Org-level controls</strong> — admins can restrict model access, set spending limits, and allocate pools across teams.</li>
+          <li><strong>Optimisation tip</strong> — use base models for boilerplate and reserve premium models for complex reasoning tasks.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div class="code-block">
+<span class="comm"># Usage Strategy Example</span>
+
+<span class="tag">Monthly Budget</span>: <span class="val">300</span> premium requests
+
+<span class="comm"># Efficient allocation:</span>
+<span class="key">Daily coding</span> (GPT-4o, 1×)
+  20 req/day × 10 days = <span class="val">200 req</span>
+
+<span class="key">Code reviews</span> (Claude Sonnet, 1×)
+  5 req/day × 10 days  = <span class="val">50 req</span>
+
+<span class="key">Architecture</span> (o3, 4×)
+  3 sessions × 4×      = <span class="hi">12 req</span>
+
+<span class="key">Long analysis</span> (Gemini, 2×)
+  5 sessions × 2×      = <span class="hi">10 req</span>
+
+<span class="comm">──────────────────────────</span>
+<span class="tag">Total</span>: <span class="val">272 / 300</span> <span class="key">✓ within budget</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5 — Closing -->
+  <section class="slide closing" data-index="5">
+    <span class="badge">Wrap Up</span>
+    <h1>Choose Smart,<br>Build Fast</h1>
+    <p class="subtitle">Leverage premium requests wisely across the right models to maximise your AI-powered development experience.</p>
+    <div style="margin-top:24px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+      <span style="padding:10px 22px;border-radius:10px;background:var(--gradient-1);font-size:.88rem;font-weight:600;color:#fff;">⚡ Premium Requests</span>
+      <span style="padding:10px 22px;border-radius:10px;background:var(--gradient-2);font-size:.88rem;font-weight:600;color:#fff;">🧠 Available Models</span>
+      <span style="padding:10px 22px;border-radius:10px;background:var(--gradient-4);font-size:.88rem;font-weight:600;color:#fff;">📊 Usage &amp; Multipliers</span>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="nav-bar">
+  <button class="btn-prev" id="prevBtn" disabled>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Previous
+  </button>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span class="counter" id="counter">1 / 6</span>
+    <div class="dots" id="dots"></div>
+  </div>
+  <button class="btn-next" id="nextBtn">
+    Next
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counter = document.getElementById('counter');
+  const dotsWrap = document.getElementById('dots');
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('span');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  });
+
+  function goTo(index) {
+    if (index < 0 || index >= total) return;
+    slides[current].classList.remove('active');
+    dotsWrap.children[current].classList.remove('active');
+    current = index;
+    slides[current].classList.add('active');
+    dotsWrap.children[current].classList.add('active');
+    counter.textContent = `${current + 1} / ${total}`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+  });
+</script>
+</body>
+</html>
