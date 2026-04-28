@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GitHub Copilot — Product Updates & Roadmap (April 2026)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            github: { DEFAULT: '#238636', dark: '#1a7f37', light: '#3fb950' },
+            copilot: { DEFAULT: '#a371f7', dark: '#8957e5', light: '#d2a8ff' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .slide { display: none; }
+    .slide.active { display: flex; }
+    .slide-enter { animation: slideIn 0.5s ease-out forwards; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    .card-pop { animation: cardPop 0.6s ease-out forwards; }
+    @keyframes cardPop { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .card-pop:nth-child(2) { animation-delay: 0.15s; }
+    .card-pop:nth-child(3) { animation-delay: 0.3s; }
+    .card-pop:nth-child(4) { animation-delay: 0.45s; }
+    .card-pop:nth-child(5) { animation-delay: 0.6s; }
+    .card-pop:nth-child(6) { animation-delay: 0.75s; }
+    .gradient-text-copilot { background: linear-gradient(90deg, #a371f7, #58a6ff, #3fb950); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .gradient-text-warm { background: linear-gradient(90deg, #f97583, #e3b341, #f0883e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .gradient-text-cool { background: linear-gradient(90deg, #58a6ff, #a371f7, #f778ba); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .gradient-text-green { background: linear-gradient(90deg, #3fb950, #58a6ff, #a371f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .gradient-text-security { background: linear-gradient(90deg, #f97583, #a371f7, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .tag { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; margin-right: 6px; }
+    .tag-ga { background: rgba(63,185,80,0.2); color: #3fb950; }
+    .tag-preview { background: rgba(163,113,247,0.2); color: #d2a8ff; }
+    .tag-deprecated { background: rgba(249,117,131,0.2); color: #f97583; }
+    .tag-new { background: rgba(88,166,255,0.2); color: #58a6ff; }
+    .tag-changed { background: rgba(227,179,65,0.2); color: #e3b341; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white antialiased overflow-hidden">
+
+  <!-- Top Controls -->
+  <div class="absolute top-4 left-4 right-4 z-50 flex justify-between items-center">
+    <div class="flex items-center gap-2 px-4 py-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300">
+      <svg class="w-6 h-6" viewBox="0 0 98 96" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"/></svg>
+      <span class="font-semibold hidden sm:inline">GitHub Copilot</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleAutoplay()" id="autoplayBtn" class="p-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300 hover:text-white transition-colors" title="Auto-play">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      </button>
+      <button onclick="goToSlide(0)" class="p-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300 hover:text-white transition-colors" title="Restart">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+      <button onclick="toggleFullscreen()" class="p-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300 hover:text-white transition-colors" title="Fullscreen (F)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Slides Container -->
+  <div id="slidesContainer" class="min-h-screen flex flex-col">
+    <div class="flex-1 flex items-center justify-center p-8 pt-20 pb-4 overflow-y-auto">
+
+      <!-- ==================== SLIDE 1: Title ==================== -->
+      <div class="slide active w-full max-w-7xl" data-tag="Title">
+        <div class="slide-enter text-center w-full">
+          <div class="mb-6">
+            <svg class="w-20 h-20 mx-auto text-copilot mb-4" viewBox="0 0 98 96" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"/></svg>
+          </div>
+          <h1 class="text-5xl md:text-7xl font-bold mb-4 gradient-text-copilot">GitHub Copilot</h1>
+          <p class="text-3xl md:text-4xl font-bold text-gray-300 mb-2">Product Updates & Roadmap</p>
+          <p class="text-xl text-gray-500 mb-1">As of April 2026</p>
+          <p class="text-lg text-gray-600">Micron — India</p>
+          <p class="text-sm text-gray-700 mt-4">Last updated: April 27, 2026</p>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 2: Agenda ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Agenda">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-5xl md:text-6xl font-bold mb-10 gradient-text-copilot">Agenda</h1>
+          <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-purple-300 mb-3">🚀 Recent Ships</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• GPT-5.5 GA & Model Landscape</li>
+                <li>• Autopilot for Agents</li>
+                <li>• Custom Agents & Skills</li>
+                <li>• Agent Environments & Sessions</li>
+                <li>• CLI: BYOK & Local Models</li>
+                <li>• IDE & Platform Updates</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-blue-300 mb-3">🧠 Agentic Platform</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Agent Activity in Issues & Jira</li>
+                <li>• PR Chat & Cloud Agent Metrics</li>
+                <li>• Slack Issue Creation</li>
+                <li>• Context Engineering</li>
+                <li>• Security & Compliance Updates</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-green-300 mb-3">🔮 Looking Ahead</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Plan Changes & Model Access</li>
+                <li>• Roadmap: What's Coming</li>
+                <li>• Resources & Links</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 3: GPT-5.5 GA + Model Landscape ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Models">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-4xl md:text-5xl font-bold mb-2 gradient-text-green">GPT-5.5 GA & Model Landscape</h1>
+          <p class="text-sm text-gray-500 mb-8"><span class="tag tag-ga">GA</span> April 24, 2026 · <a href="https://github.blog/changelog/2026-04-24-gpt-5-5-is-generally-available-for-github-copilot" class="text-blue-400 hover:underline">changelog →</a></p>
+          <div class="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-green-300 mb-3">🧠 GPT-5.5</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• OpenAI's latest & most capable model</li>
+                <li>• Strongest on complex, multi-step agentic tasks</li>
+                <li>• Rolling out across all Copilot experiences</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-blue-300 mb-3">📋 Current Model Roster</h3>
+              <div class="grid grid-cols-2 gap-3 text-xs text-gray-300">
+                <div>
+                  <p class="text-purple-400 font-semibold mb-1">Anthropic</p>
+                  <p>Claude Opus 4.6 / 4.5</p>
+                  <p>Claude Sonnet 4.6 / 4.5 / 4</p>
+                  <p>Claude Haiku 4.5</p>
+                </div>
+                <div>
+                  <p class="text-blue-400 font-semibold mb-1">OpenAI</p>
+                  <p>GPT-5.5, GPT-5.4, GPT-5.4 Mini</p>
+                  <p>GPT-5.3 Codex, GPT-5.2 Codex</p>
+                </div>
+                <div>
+                  <p class="text-green-400 font-semibold mb-1">Google</p>
+                  <p>Gemini 3.1 Pro, 2.5 Pro</p>
+                  <p>Gemini 3 Flash</p>
+                </div>
+                <div>
+                  <p class="text-orange-400 font-semibold mb-1">Others</p>
+                  <p>Grok 3.1 Pro, Grok Code Fast 1</p>
+                  <p>Raptor Mini, Goldeneye</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="max-w-6xl mx-auto mt-4">
+            <div class="card-pop bg-gradient-to-br from-gray-800/50 to-gray-700/30 border border-gray-600/50 rounded-2xl p-4">
+              <p class="text-sm text-gray-400"><span class="tag tag-deprecated">DEPRECATED</span> Gemini 3 Pro (Mar 26) · <span class="tag tag-changed">CHANGED</span> Opus 4.6 default "medium" reasoning · <span class="tag tag-changed">CHANGED</span> Opus models removed from Pro plan</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 4: Autopilot for Agents ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Autopilot">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-5xl md:text-6xl font-bold mb-2 gradient-text-cool">Autopilot for Agents</h1>
+          <p class="text-sm text-gray-500 mb-10"><span class="tag tag-preview">PREVIEW</span> VS Code March Release · <a href="https://github.blog/changelog/2026-04-08-github-copilot-in-visual-studio-code-march-releases/" class="text-blue-400 hover:underline">changelog →</a></p>
+          <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8">
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">🛡️</div>
+              <h3 class="text-lg font-bold text-blue-300 mb-2">Default</h3>
+              <p class="text-sm text-gray-300">Manual approval for every file edit and terminal command</p>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">⚡</div>
+              <h3 class="text-lg font-bold text-purple-300 mb-2">Bypass Approvals</h3>
+              <p class="text-sm text-gray-300">Skip confirmations for trusted actions — faster iteration</p>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">🤖</div>
+              <h3 class="text-lg font-bold text-green-300 mb-2">Autopilot</h3>
+              <p class="text-sm text-gray-300">Fully autonomous — self-approves, retries on errors, works until done</p>
+            </div>
+          </div>
+          <div class="max-w-3xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-gray-800/50 to-gray-700/30 border border-gray-600/50 rounded-2xl p-4">
+              <p class="text-gray-300 text-sm">Also shipped: <strong>Configurable "thinking effort"</strong> for Claude Sonnet 4.6 & GPT-5.4 · <strong>Integrated browser debugging</strong> · <strong>Images & video in Chat</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 5: Custom Agents & Skills ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Custom Agents">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-4xl md:text-5xl font-bold mb-2 gradient-text-copilot">Custom Agents, Skills & Plugins</h1>
+          <p class="text-sm text-gray-500 mb-8"><span class="tag tag-new">NEW</span> VS / VS Code March Updates</p>
+          <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-purple-300 mb-3">🤖 Custom Agents</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Define via <code class="bg-gray-800 px-1.5 py-0.5 rounded text-xs">.agent.md</code> files</li>
+                <li>• Versioned & auditable in your repo</li>
+                <li>• Persona-based: Architect, Planner, Reviewer</li>
+                <li>• Org-level agents via GHEC</li>
+                <li>• Invoke from agent mode in IDE</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-blue-300 mb-3">🧩 Agent Skills</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Modular instruction sets</li>
+                <li>• <code class="bg-gray-800 px-1.5 py-0.5 rounded text-xs">.github/skills/</code> folders</li>
+                <li>• Shared across agents in a repo</li>
+                <li>• <code class="bg-gray-800 px-1.5 py-0.5 rounded text-xs">find_symbol</code> tool for code nav</li>
+                <li>• Replaces giant prompts</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-orange-300 mb-3">🔌 Agent Plugins & Hooks</h3>
+              <p class="text-xs text-gray-500 mb-2"><span class="tag tag-preview">PREVIEW</span></p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Installable bundles via VS Code marketplace</li>
+                <li>• Includes slash commands, skills, MCP servers</li>
+                <li>• <strong>Hooks:</strong> shell commands during sessions</li>
+                <li>• Enforce linters, formatters, security checks</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 6: Agent Environments & Sessions ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Agent Envs">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-4xl md:text-5xl font-bold mb-2 gradient-text-cool">Agent Environments & Sessions</h1>
+          <p class="text-sm text-gray-500 mb-8">Choose where your agents run · Monitor & steer in real-time</p>
+          <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-6">
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">💻</div>
+              <h3 class="text-lg font-bold text-blue-300 mb-2">Local Agent</h3>
+              <p class="text-sm text-gray-300 mb-2">Runs in your IDE</p>
+              <ul class="text-xs text-gray-400 space-y-1 text-left">
+                <li>• Full local tool access</li>
+                <li>• Uses your machine's hardware</li>
+                <li>• Best for: heavy lifting, debugging</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">⌨️</div>
+              <h3 class="text-lg font-bold text-purple-300 mb-2">Copilot CLI</h3>
+              <p class="text-sm text-gray-300 mb-2">Background terminal agent</p>
+              <ul class="text-xs text-gray-400 space-y-1 text-left">
+                <li>• Fleet mode for parallelism</li>
+                <li>• Creates PRs & issues from CLI</li>
+                <li>• Best for: automation, scripting</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">☁️</div>
+              <h3 class="text-lg font-bold text-green-300 mb-2">Cloud Agent</h3>
+              <p class="text-sm text-gray-300 mb-2">Runs on GitHub.com</p>
+              <ul class="text-xs text-gray-400 space-y-1 text-left">
+                <li>• Isolated secure environment</li>
+                <li>• Persistent across sessions</li>
+                <li>• Best for: async issues → PRs</li>
+              </ul>
+            </div>
+          </div>
+          <div class="max-w-4xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-gray-800/50 to-gray-700/30 border border-gray-600/50 rounded-2xl p-4">
+              <p class="text-sm text-gray-300"><strong>Agent Sessions:</strong> Monitor active sessions · Share & archive · Filter by status · Steer agents mid-execution · Full transparency into agent work</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 7: CLI BYOK & Local Models ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="CLI BYOK">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-5xl md:text-6xl font-bold mb-2 gradient-text-warm">Copilot CLI: BYOK & Local Models</h1>
+          <p class="text-sm text-gray-500 mb-10"><span class="tag tag-new">NEW</span> April 7, 2026 · <a href="https://github.blog/changelog/2026-04-07-copilot-cli-now-supports-byok-and-local-models/" class="text-blue-400 hover:underline">changelog →</a></p>
+          <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-700/50 rounded-2xl p-7 text-left">
+              <h3 class="text-xl font-bold text-orange-300 mb-4">🔑 Bring Your Own Key</h3>
+              <ul class="space-y-3 text-gray-300">
+                <li>• Use your own API keys for model access</li>
+                <li>• Connect to Azure OpenAI, Anthropic, etc.</li>
+                <li>• Fully local model support</li>
+                <li>• Air-gapped environment compatible</li>
+                <li>• Enterprise & Business plans</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-700/50 rounded-2xl p-7 text-left">
+              <h3 class="text-xl font-bold text-red-300 mb-4">⚡ Also in This Release</h3>
+              <ul class="space-y-3 text-gray-300">
+                <li>• <span class="tag tag-preview">PREVIEW</span> C++ Code Intelligence</li>
+                <li>• Auto model selection per query</li>
+                <li>• <code class="bg-gray-800 px-2 py-0.5 rounded text-sm">/keep-alive</code> for persistent sessions</li>
+                <li>• <span class="tag tag-preview">PREVIEW</span> Remote control CLI (web & mobile)</li>
+                <li>• Opt-out usage telemetry for GH CLI</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 8: Agent Activity + Jira ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Agents + PM">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-4xl md:text-5xl font-bold mb-2 gradient-text-green">Agents Meet Project Management</h1>
+          <p class="text-sm text-gray-500 mb-8"><span class="tag tag-new">NEW</span> March 26 & April 22, 2026</p>
+          <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-green-300 mb-3">📊 Agent in Issues & Projects</h3>
+              <p class="text-xs text-gray-500 mb-2"><a href="https://github.blog/changelog/2026-03-26-agent-activity-in-github-issues-and-projects" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Agent sessions under issue assignees</li>
+                <li>• Works for Copilot, Claude, Codex agents</li>
+                <li>• Manage sessions from Projects boards</li>
+                <li>• Track agent work alongside humans</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-purple-300 mb-3">🎫 Copilot for Jira</h3>
+              <p class="text-xs text-gray-500 mb-2"><a href="https://github.blog/changelog/2026-04-22-github-copilot-for-jira-our-latest-enhancements" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Cloud agent integrates with Jira</li>
+                <li>• Assign Jira tickets to Copilot</li>
+                <li>• Customizable workflows</li>
+                <li>• Team control over interactions</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-blue-300 mb-3">💬 Issues from Slack</h3>
+              <p class="text-xs text-gray-500 mb-2"><a href="https://github.blog/changelog/2026-03-30-create-issues-from-slack-with-copilot" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• <code class="bg-gray-800 px-1 rounded text-xs">@GitHub</code> in any Slack channel</li>
+                <li>• Natural language → structured issue</li>
+                <li>• No context switching</li>
+                <li>• Instant project board sync</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 9: PR Chat & Metrics ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="PR & Metrics">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-5xl md:text-6xl font-bold mb-2 gradient-text-cool">PR Chat & Cloud Agent Metrics</h1>
+          <p class="text-sm text-gray-500 mb-10"><span class="tag tag-new">NEW</span> April 23, 2026</p>
+          <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-7 text-left">
+              <h3 class="text-xl font-bold text-blue-300 mb-4">🔀 Copilot Chat for PRs</h3>
+              <p class="text-xs text-gray-500 mb-3"><a href="https://github.blog/changelog/2026-04-23-copilot-chat-improvements-for-pull-requests" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-3 text-gray-300">
+                <li>• Richer context when working with diffs</li>
+                <li>• Ask questions about specific PR changes</li>
+                <li>• Generate summaries & structured reviews</li>
+                <li>• Navigate complex diffs conversationally</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-7 text-left">
+              <h3 class="text-xl font-bold text-green-300 mb-4">📈 Cloud Agent Usage Metrics</h3>
+              <p class="text-xs text-gray-500 mb-3"><a href="https://github.blog/changelog/2026-04-23-copilot-cloud-agent-fields-added-to-usage-metrics" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-3 text-gray-300">
+                <li>• New <code class="bg-gray-800 px-1.5 py-0.5 rounded text-xs">used_copilot_cloud_agent</code> in metrics API</li>
+                <li>• Track agent adoption per user</li>
+                <li>• Aggregated agent activity reporting</li>
+                <li>• "Coding agent" → "cloud agent" rename</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 10: IDE Updates ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="IDE Updates">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-4xl md:text-5xl font-bold mb-2 gradient-text-copilot">IDE March/April Releases</h1>
+          <p class="text-sm text-gray-500 mb-8">VS Code v1.111–1.115 · Visual Studio March Update · JetBrains</p>
+          <div class="grid md:grid-cols-3 gap-5 max-w-6xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-blue-300 mb-3">💻 VS Code</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Integrated browser debugging</li>
+                <li>• Images & video in Chat (carousel)</li>
+                <li>• Unified editor for customizations</li>
+                <li>• Faster semantic workspace search</li>
+                <li>• Sandboxed MCP servers for local use</li>
+                <li>• AI troubleshooting log tools</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-purple-300 mb-3">🟣 Visual Studio</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Custom Agents (<code class="bg-gray-800 px-1 rounded text-xs">.agent.md</code>)</li>
+                <li>• Agent Skills & find_symbol</li>
+                <li>• Profile tests with Copilot insights</li>
+                <li>• PerfTips & Watch suggestions</li>
+                <li>• NuGet vulnerability remediation</li>
+                <li>• MCP tool governance</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-orange-300 mb-3">🔶 JetBrains</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• <span class="tag tag-preview" style="font-size:0.6rem">PREVIEW</span> Inline Agent Mode</li>
+                <li>• Enhanced Next Edit Suggestions</li>
+                <li>• PR context in completions</li>
+                <li>• Better terminal command controls</li>
+                <li>• Improved file edit confirmations</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 11: Context Engineering ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Context Eng">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-4xl md:text-5xl font-bold mb-2 gradient-text-copilot">Context Engineering</h1>
+          <p class="text-xl text-gray-400 mb-8">The art of giving Copilot the right context</p>
+          <div class="grid md:grid-cols-3 gap-5 max-w-6xl mx-auto mb-6">
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-purple-300 mb-3">📋 Custom Instructions</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• <code class="bg-gray-800 px-1 rounded text-xs">.github/copilot-instructions.md</code></li>
+                <li>• Org-level & repo-level</li>
+                <li>• Coding standards, patterns, preferences</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-blue-300 mb-3">💾 Prompt Files</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• <code class="bg-gray-800 px-1 rounded text-xs">.github/prompts/*.prompt.md</code></li>
+                <li>• Version-controlled prompt libraries</li>
+                <li>• Shareable across team</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-green-300 mb-3">📚 Copilot Spaces</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Persistent team knowledge base</li>
+                <li>• Code, files, preferences remembered</li>
+                <li>• Reduces cognitive load</li>
+              </ul>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-3 gap-5 max-w-6xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-orange-300 mb-3">🔌 MCP Servers</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• "USB-C for AI" — universal connector</li>
+                <li>• Tools, resources, prompts via protocol</li>
+                <li>• Repo mgmt, CI/CD, external APIs</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-pink-900/30 to-pink-800/20 border border-pink-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-pink-300 mb-3">🧠 Agentic Memory</h3>
+              <p class="text-xs text-gray-500 mb-2"><span class="tag tag-preview">PREVIEW</span> GHEC</p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Auto-captures short-lived memories</li>
+                <li>• Repo-specific, shared across features</li>
+                <li>• Auto-expires after 28 days</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-700/50 rounded-2xl p-5 text-left">
+              <h3 class="text-lg font-bold text-red-300 mb-3">📐 Plan Mode</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Plan before you build</li>
+                <li>• Generates to-do lists</li>
+                <li>• Asks clarifying questions</li>
+                <li>• Full visibility pre-implementation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 12: Security Updates ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Security">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-5xl md:text-6xl font-bold mb-2 gradient-text-security">Security & Platform Updates</h1>
+          <p class="text-sm text-gray-500 mb-10">March–April 2026</p>
+          <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-red-300 mb-3">🔍 Secret Scanning</h3>
+              <p class="text-xs text-gray-500 mb-2"><a href="https://github.blog/changelog/2026-03-31-github-secret-scanning-nine-new-types-and-more" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• 9 new secret detectors (7 providers)</li>
+                <li>• Langchain, Salesforce, Figma</li>
+                <li>• Improved validators & analyzers</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-blue-300 mb-3">🛡️ CodeQL 2.25.0</h3>
+              <p class="text-xs text-gray-500 mb-2"><a href="https://github.blog/changelog/2026-03-31-codeql-2-25-0-adds-swift-6-2-4-support" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Swift 6.2.4 support</li>
+                <li>• Powers Copilot Autofix</li>
+                <li>• Enhanced static analysis</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-green-300 mb-3">🐍 Python Dep Graphs</h3>
+              <p class="text-xs text-gray-500 mb-2"><a href="https://github.blog/changelog/2026-04-23-dependabot-graphs-for-python" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• Dependabot transitive deps</li>
+                <li>• More accurate SBOMs</li>
+                <li>• Complete dependency trees</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 13: Plan Changes ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Plan Changes">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-5xl md:text-6xl font-bold mb-2 gradient-text-warm">Copilot Plan Changes</h1>
+          <p class="text-sm text-gray-500 mb-10"><span class="tag tag-changed">CHANGED</span> April 10–20, 2026</p>
+          <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-6">
+            <div class="card-pop bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-700/50 rounded-2xl p-7 text-left">
+              <h3 class="text-xl font-bold text-orange-300 mb-4">📋 What Changed</h3>
+              <p class="text-xs text-gray-500 mb-3"><a href="https://github.blog/changelog/2026-04-20-changes-to-github-copilot-plans-for-individuals" class="text-blue-400 hover:underline">changelog →</a></p>
+              <ul class="space-y-3 text-gray-300">
+                <li>• <strong>Paused new signups</strong> for Pro, Pro+, Student</li>
+                <li>• Copilot Free still open for new users</li>
+                <li>• Existing users can still upgrade</li>
+                <li>• Tighter usage limits on Pro tier</li>
+                <li>• Pro+ gets 5x+ the rate limits of Pro</li>
+                <li>• Refund option through May 20, 2026</li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-700/50 rounded-2xl p-7 text-left">
+              <h3 class="text-xl font-bold text-red-300 mb-4">🧠 Model Access Changes</h3>
+              <ul class="space-y-3 text-gray-300">
+                <li>• Opus models (4.7) → <strong>Pro+ only</strong></li>
+                <li>• Opus 4.5 & 4.6 planned for removal from Pro+</li>
+                <li>• Pro trials paused for service quality</li>
+                <li>• Direction: basic tier (completions) + advanced tier (agents & premium models)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="max-w-3xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-gray-800/50 to-gray-700/30 border border-gray-600/50 rounded-2xl p-4">
+              <p class="text-gray-400 text-sm">💡 <strong>Business & Enterprise plans are unaffected</strong> — these changes apply to individual subscriptions only.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 14: Roadmap ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Roadmap">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-5xl md:text-6xl font-bold mb-4 gradient-text-cool">What's on the Roadmap</h1>
+          <p class="text-lg text-gray-400 mb-8">From <a href="https://github.com/orgs/github/projects/4247" class="text-blue-400 hover:underline">GitHub Public Roadmap</a> & <a href="https://github.com/github/roadmap" class="text-blue-400 hover:underline">github/roadmap</a></p>
+          <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-6">
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">🔗</div>
+              <h3 class="text-lg font-bold text-purple-300 mb-2">MCP Registry</h3>
+              <p class="text-sm text-gray-300">Central registry for discovering & managing MCP tool integrations</p>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">🤖</div>
+              <h3 class="text-lg font-bold text-blue-300 mb-2">Multi-Agent DevOps</h3>
+              <p class="text-sm text-gray-300">SRE agents monitoring production, filing issues, resolving incidents autonomously</p>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">🎯</div>
+              <h3 class="text-lg font-bold text-green-300 mb-2">Copilot Vision</h3>
+              <p class="text-sm text-gray-300">UI mockups & diagrams → code generation (Pro+ / Enterprise)</p>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">📐</div>
+              <h3 class="text-lg font-bold text-orange-300 mb-2">Copilot Spec Kit</h3>
+              <p class="text-sm text-gray-300">Spec-driven development: Specify → Plan → Tasks → Implement</p>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-pink-900/30 to-pink-800/20 border border-pink-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">📊</div>
+              <h3 class="text-lg font-bold text-pink-300 mb-2">Global PR Dashboard</h3>
+              <p class="text-sm text-gray-300">Centralized PR view across orgs, repos, and teams</p>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-700/50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">🏢</div>
+              <h3 class="text-lg font-bold text-red-300 mb-2">Enterprise Controls</h3>
+              <p class="text-sm text-gray-300">Data residency, agent governance, AI Manager, usage metrics</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 15: Resources ==================== -->
+      <div class="slide w-full max-w-7xl" data-tag="Resources">
+        <div class="slide-enter text-center w-full">
+          <h1 class="text-5xl md:text-6xl font-bold mb-4 gradient-text-copilot">Resources & Links</h1>
+          <p class="text-xl text-gray-400 mb-8">Stay up to date</p>
+          <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div class="card-pop bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-purple-300 mb-3">📖 Track Updates</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• <a href="https://github.com/orgs/github/projects/4247" class="text-blue-400 hover:underline">Public Roadmap (Projects)</a></li>
+                <li>• <a href="https://github.blog/changelog/label/copilot/" class="text-blue-400 hover:underline">Changelog — Copilot</a></li>
+                <li>• <a href="https://github.com/features/copilot/whats-new" class="text-blue-400 hover:underline">What's New</a></li>
+                <li>• <a href="https://github.blog/ai-and-ml/github-copilot/" class="text-blue-400 hover:underline">GitHub Blog — Copilot</a></li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-blue-300 mb-3">🛠️ Docs & Guides</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• <a href="https://docs.github.com/copilot" class="text-blue-400 hover:underline">Copilot Docs</a></li>
+                <li>• <a href="https://github.com/mcp" class="text-blue-400 hover:underline">MCP Registry</a></li>
+                <li>• <a href="https://code.visualstudio.com/docs/copilot" class="text-blue-400 hover:underline">VS Code Copilot Docs</a></li>
+                <li>• <a href="https://gh.io/copilot-fundamentals" class="text-blue-400 hover:underline">Copilot Fundamentals</a></li>
+              </ul>
+            </div>
+            <div class="card-pop bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-2xl p-6 text-left">
+              <h3 class="text-lg font-bold text-green-300 mb-3">🚀 Quick Links</h3>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li>• <a href="https://gh.io/changelog" class="text-blue-400 hover:underline">gh.io/changelog</a></li>
+                <li>• <a href="https://gh.io/public-roadmap" class="text-blue-400 hover:underline">gh.io/public-roadmap</a></li>
+                <li>• <a href="https://gh.io/universe-25" class="text-blue-400 hover:underline">gh.io/universe-25</a></li>
+                <li>• <a href="https://github.com/orgs/community/discussions" class="text-blue-400 hover:underline">GitHub Community</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="mt-8">
+            <p class="text-xl text-gray-400">Thank you! 🙏</p>
+            <p class="text-gray-500 mt-2">Questions?</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <div class="p-3">
+      <div class="flex items-center justify-between max-w-7xl mx-auto">
+        <button onclick="prevSlide()" id="prevBtn" class="flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>Previous
+        </button>
+        <div class="flex items-center gap-4">
+          <div id="slideCounter" class="text-gray-400 text-sm">1 / 15</div>
+          <div id="dotIndicators" class="hidden md:flex gap-1"></div>
+        </div>
+        <button onclick="nextSlide()" id="nextBtn" class="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl text-white transition-colors">
+          Next<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="p-3 pt-0">
+      <div id="categoryTags" class="flex flex-wrap justify-center gap-2 max-w-7xl mx-auto"></div>
+    </div>
+    <div class="text-center text-gray-500 text-xs pb-3">Use ← → arrow keys or Space to navigate • F for fullscreen</div>
+  </div>
+
+  <script>
+    let currentSlide = 0, autoplayTimer = null;
+    const slides = document.querySelectorAll('.slide'), totalSlides = slides.length;
+
+    function updateSlide() {
+      slides.forEach((s, i) => {
+        s.classList.remove('active');
+        if (i === currentSlide) {
+          s.classList.add('active');
+          const inner = s.querySelector('.slide-enter');
+          if (inner) { inner.style.animation = 'none'; inner.offsetHeight; inner.style.animation = ''; }
+          s.querySelectorAll('.card-pop').forEach(c => { c.style.animation = 'none'; c.offsetHeight; c.style.animation = ''; });
+        }
+      });
+      document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+      document.getElementById('prevBtn').disabled = currentSlide === 0;
+      document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+      const dots = document.getElementById('dotIndicators');
+      dots.innerHTML = '';
+      slides.forEach((s, i) => {
+        const d = document.createElement('button');
+        d.className = `w-2 h-2 rounded-full transition-all ${i === currentSlide ? 'w-6 bg-purple-400' : 'bg-gray-600 hover:bg-gray-500'}`;
+        d.title = s.dataset.tag; d.onclick = () => goToSlide(i); dots.appendChild(d);
+      });
+      const tags = document.getElementById('categoryTags');
+      tags.innerHTML = '';
+      slides.forEach((s, i) => {
+        const t = document.createElement('button');
+        t.className = `px-3 py-1 rounded-lg text-sm transition-colors ${i === currentSlide ? 'bg-purple-500/20 text-purple-300' : 'bg-gray-800 text-gray-400 hover:text-white'}`;
+        t.textContent = s.dataset.tag; t.onclick = () => goToSlide(i); tags.appendChild(t);
+      });
+    }
+
+    function nextSlide() { if (currentSlide < totalSlides - 1) { currentSlide++; updateSlide(); } }
+    function prevSlide() { if (currentSlide > 0) { currentSlide--; updateSlide(); } }
+    function goToSlide(n) { currentSlide = n; updateSlide(); }
+    function toggleFullscreen() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+    function toggleAutoplay() {
+      const b = document.getElementById('autoplayBtn');
+      if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; b.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>'; }
+      else { autoplayTimer = setInterval(() => { if (currentSlide < totalSlides - 1) nextSlide(); else { clearInterval(autoplayTimer); autoplayTimer = null; b.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>'; } }, 8000);
+        b.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'; }
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+    });
+    updateSlide();
+  </script>
+</body>
+</html>
