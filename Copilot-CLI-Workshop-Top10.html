@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copilot CLI Workshop — Top 10 Commands</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --accent: #6366f1;
+    --accent-light: #818cf8;
+    --bg-dark: #0f0f1a;
+    --bg-card: rgba(255,255,255,0.04);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --gradient-1: linear-gradient(135deg, #6366f1, #a855f7);
+    --gradient-2: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
+    --gradient-4: linear-gradient(135deg, #10b981, #3b82f6);
+    --gradient-5: linear-gradient(135deg, #ec4899, #8b5cf6);
+    --gradient-6: linear-gradient(135deg, #f97316, #eab308);
+    --gradient-7: linear-gradient(135deg, #14b8a6, #22d3ee);
+    --gradient-8: linear-gradient(135deg, #e11d48, #f43f5e);
+    --gradient-9: linear-gradient(135deg, #8b5cf6, #6366f1);
+    --gradient-10: linear-gradient(135deg, #059669, #10b981);
+  }
+
+  html, body {
+    height: 100%; width: 100%;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── Animated background ── */
+  .bg-orbs {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  }
+  .bg-orbs span {
+    position: absolute; border-radius: 50%; filter: blur(120px); opacity: .18;
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+  .bg-orbs span:nth-child(1){ width:600px;height:600px;background:#6366f1;top:-10%;left:-5%; }
+  .bg-orbs span:nth-child(2){ width:500px;height:500px;background:#a855f7;bottom:-10%;right:-5%;animation-delay:-7s; }
+  .bg-orbs span:nth-child(3){ width:400px;height:400px;background:#3b82f6;top:40%;left:50%;animation-delay:-13s; }
+  @keyframes drift {
+    0%  { transform: translate(0,0) scale(1); }
+    100%{ transform: translate(60px,40px) scale(1.15); }
+  }
+
+  /* ── Slide wrapper ── */
+  .deck { position: relative; width: 100%; height: 100%; z-index: 1; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 48px 72px 90px;
+    opacity: 0; visibility: hidden;
+    transition: opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1);
+    transform: translateY(30px) scale(.97);
+  }
+  .slide.active {
+    opacity: 1; visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  /* ── Typography ── */
+  .badge {
+    display: inline-block;
+    padding: 6px 18px; border-radius: 999px;
+    font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    background: rgba(99,102,241,.15); color: var(--accent-light);
+    margin-bottom: 20px;
+  }
+  .slide h1 {
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-weight: 800; line-height: 1.1;
+    background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 18px; text-align: center;
+  }
+  .slide h2 {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 700; line-height: 1.15;
+    margin-bottom: 12px; text-align: center;
+  }
+  .slide .subtitle {
+    font-size: 1.05rem; color: var(--text-dim); max-width: 640px;
+    text-align: center; line-height: 1.7; margin-bottom: 32px;
+  }
+
+  /* ── Agenda grid (5 cols x 2 rows) ── */
+  .agenda-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
+    max-width: 1100px; width: 100%; margin-top: 8px;
+  }
+  .agenda-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 16px; padding: 22px 16px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    transition: transform .3s, box-shadow .3s, border-color .3s;
+    cursor: default;
+  }
+  .agenda-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(99,102,241,.12);
+    border-color: rgba(99,102,241,.25);
+  }
+  .agenda-card .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 12px;
+    font-size: .95rem; font-weight: 800; color: #fff;
+    margin: 0 auto 14px;
+  }
+  .agenda-card h3 { font-size: .88rem; font-weight: 600; margin-bottom: 4px; }
+  .agenda-card p { font-size: .74rem; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── Content slides ── */
+  .content-wrap {
+    display: flex; gap: 40px; align-items: flex-start;
+    max-width: 1060px; width: 100%; margin-top: 4px;
+  }
+  .content-left { flex: 1; }
+  .content-right {
+    flex: 1; background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 18px; padding: 28px; backdrop-filter: blur(12px);
+    position: relative; overflow: hidden;
+  }
+  .content-right::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .feature-list { list-style: none; }
+  .feature-list li {
+    position: relative; padding: 10px 0 10px 28px;
+    font-size: .88rem; line-height: 1.6; color: var(--text-dim);
+    border-bottom: 1px solid rgba(255,255,255,.04);
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li::before {
+    content: '✦'; position: absolute; left: 0; top: 10px;
+    font-size: .75rem; color: var(--accent-light);
+  }
+  .feature-list li strong { color: var(--text); font-weight: 600; }
+
+  .code-block {
+    background: rgba(0,0,0,.35); border-radius: 12px;
+    padding: 18px 20px; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: .78rem; line-height: 1.75; color: #c4b5fd;
+    overflow-x: auto; margin-top: 6px;
+    border: 1px solid rgba(255,255,255,.05);
+  }
+  .code-block .comm { color: #64748b; }
+  .code-block .key  { color: #6ee7b7; }
+  .code-block .val  { color: #fbbf24; }
+  .code-block .tag  { color: #93c5fd; }
+  .code-block .cmd  { color: #f472b6; }
+
+  .tip-box {
+    margin-top: 14px; padding: 12px 16px; border-radius: 12px;
+    background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.15);
+    font-size: .8rem; color: var(--text-dim); line-height: 1.6;
+  }
+  .tip-box strong { color: var(--accent-light); }
+
+  /* slide number badge */
+  .slide-num {
+    position: absolute; top: 28px; left: 36px;
+    font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+    color: rgba(255,255,255,.12);
+  }
+
+  /* ── Intro / Speaker slide ── */
+  .intro-card {
+    display: flex; align-items: center; gap: 56px;
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 24px; padding: 48px 56px;
+    backdrop-filter: blur(14px);
+    max-width: 820px; width: 100%;
+    position: relative; overflow: hidden;
+  }
+  .intro-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: var(--gradient-1); border-radius: 24px 24px 0 0;
+  }
+  .avatar-ring {
+    flex-shrink: 0;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    padding: 4px;
+    background: var(--gradient-1);
+    box-shadow: 0 0 40px rgba(99,102,241,.3);
+  }
+  .avatar-ring img {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    background: var(--bg-dark);
+  }
+  .speaker-info { text-align: left; }
+  .speaker-info h2 {
+    font-size: 2rem; font-weight: 800; text-align: left;
+    background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .speaker-info .role {
+    font-size: 1rem; color: var(--accent-light); font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .speaker-info .tagline {
+    font-size: .88rem; color: var(--text-dim); line-height: 1.65;
+    max-width: 380px;
+  }
+  .speaker-socials {
+    display: flex; gap: 10px; margin-top: 16px;
+  }
+  .speaker-socials span {
+    padding: 5px 14px; border-radius: 8px;
+    background: rgba(255,255,255,.06); font-size: .75rem;
+    color: var(--text-dim); font-weight: 500;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+
+  /* ── Closing slide ── */
+  .closing h1 {
+    font-size: clamp(2.6rem, 5vw, 4.5rem);
+    background: var(--gradient-3); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+  }
+  .closing-pills {
+    margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    max-width: 900px;
+  }
+  .closing-pills span {
+    padding: 8px 18px; border-radius: 10px;
+    font-size: .8rem; font-weight: 600; color: #fff;
+  }
+
+  /* ── Navigation ── */
+  .nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 40px;
+    background: rgba(15,15,26,.8); backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .nav-bar button {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px; border: none; border-radius: 10px;
+    font-family: inherit; font-size: .86rem; font-weight: 600;
+    cursor: pointer; transition: background .25s, transform .15s, opacity .25s;
+  }
+  .nav-bar button:active { transform: scale(.96); }
+  .btn-prev {
+    background: rgba(255,255,255,.08); color: var(--text);
+  }
+  .btn-prev:hover { background: rgba(255,255,255,.14); }
+  .btn-next {
+    background: var(--gradient-1); color: #fff;
+    box-shadow: 0 4px 20px rgba(99,102,241,.35);
+  }
+  .btn-next:hover { filter: brightness(1.1); }
+  .btn-prev:disabled, .btn-next:disabled {
+    opacity: .3; pointer-events: none;
+  }
+
+  .dots { display: flex; gap: 8px; }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    transition: background .3s, transform .3s, box-shadow .3s;
+    cursor: pointer;
+  }
+  .dot.active {
+    background: var(--accent-light);
+    transform: scale(1.25);
+    box-shadow: 0 0 10px rgba(99,102,241,.5);
+  }
+
+  .counter { font-size: .8rem; color: var(--text-dim); font-weight: 500; min-width: 60px; text-align: center; }
+
+  .key-hint {
+    position: fixed; top: 16px; right: 22px; z-index: 10;
+    font-size: .7rem; color: var(--text-dim); opacity: .5;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .key-hint kbd {
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
+    font-family: inherit; font-size: .68rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .agenda-grid { grid-template-columns: repeat(2, 1fr); max-width: 480px; }
+    .content-wrap { flex-direction: column; }
+    .slide { padding: 36px 24px 100px; }
+    .nav-bar { padding: 12px 20px; }
+    .intro-card { flex-direction: column; padding: 36px 28px; gap: 24px; text-align: center; }
+    .speaker-info { text-align: center; }
+    .speaker-info h2 { text-align: center; }
+    .speaker-socials { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs"><span></span><span></span><span></span></div>
+<div class="key-hint"><kbd>←</kbd> <kbd>→</kbd> to navigate</div>
+
+<!-- ===== SLIDES ===== -->
+<div class="deck">
+
+  <!-- Slide 0 — Speaker -->
+  <section class="slide active" data-index="0">
+    <span class="badge">Presented By</span>
+    <div class="intro-card">
+      <div class="avatar-ring">
+        <img src="WalPic.png" alt="Nagaraju Matta">
+      </div>
+      <div class="speaker-info">
+        <h2>Nagaraju Matta</h2>
+        <div class="role">Customer Success Architect</div>
+        <div class="tagline">Hands-on workshop: master the 10 most powerful Copilot CLI commands to supercharge your terminal-native development workflow.</div>
+        <div class="speaker-socials">
+          <span>Microsoft</span>
+          <span>GitHub Copilot</span>
+          <span>CLI Workshop</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 1 — Agenda -->
+  <section class="slide" data-index="1">
+    <span class="badge">Workshop Agenda</span>
+    <h1>Copilot CLI Workshop<br>Top 10 Commands</h1>
+    <p class="subtitle">From planning to parallel execution — the essential commands every developer should know.</p>
+    <div class="agenda-grid">
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-1);">1</div>
+        <h3>/plan</h3>
+        <p>Structured planning before coding</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-2);">2</div>
+        <h3>/model</h3>
+        <p>Switch AI models on the fly</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-4);">3</div>
+        <h3>/review</h3>
+        <p>AI-powered code review</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-5);">4</div>
+        <h3>/delegate</h3>
+        <p>Offload work to the cloud</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-6);">5</div>
+        <h3>/fleet</h3>
+        <p>Parallel subtask execution</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-7);">6</div>
+        <h3>/context</h3>
+        <p>Visualize context usage</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-8);">7</div>
+        <h3>/session</h3>
+        <p>Session &amp; checkpoint mgmt</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-9);">8</div>
+        <h3>/add-dir</h3>
+        <p>Multi-repo workflows</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-10);">9</div>
+        <h3>--allow-tool</h3>
+        <p>Fine-grained permissions</p>
+      </div>
+      <div class="agenda-card">
+        <div class="num" style="background:var(--gradient-3);">10</div>
+        <h3>/compact &amp; /clear</h3>
+        <p>Session hygiene &amp; resets</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 2 — Command 1: /plan -->
+  <section class="slide" data-index="2">
+    <span class="slide-num">01</span>
+    <span class="badge">Command 1</span>
+    <h2>/plan — Plan Before You Code</h2>
+    <p class="subtitle">Create a structured implementation plan before writing a single line of code. Toggle with Shift+Tab or use the slash command.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>Structured plans</strong> — Copilot analyzes your request, asks clarifying questions, then builds a step-by-step plan.</li>
+          <li><strong>Saved to plan.md</strong> — the plan is persisted in your session folder for reference and editing.</li>
+          <li><strong>Approval workflow</strong> — review and approve the plan before Copilot starts implementing.</li>
+          <li><strong>Best for complex tasks</strong> — multi-file changes, refactoring, new feature implementations.</li>
+          <li><strong>Edit interactively</strong> — press Ctrl+Y to open the plan in your default editor.</li>
+        </ul>
+      </div>
+      <div class="content-right" style="--slide-gradient: var(--gradient-1);">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-1);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># Start plan mode with a slash command</span>
+<span class="cmd">></span> <span class="key">/plan</span> <span class="val">Add OAuth2 authentication
+  with Google and GitHub providers</span>
+
+<span class="comm"># Copilot will:</span>
+<span class="comm"># 1. Analyze your codebase</span>
+<span class="comm"># 2. Ask clarifying questions</span>
+<span class="comm"># 3. Create a structured plan</span>
+
+<span class="tag">📋 Plan saved to plan.md</span>
+<span class="tag">   - Install dependencies</span>
+<span class="tag">   - Create auth routes</span>
+<span class="tag">   - Implement passport strategies</span>
+<span class="tag">   - Add session management</span>
+<span class="tag">   - Write integration tests</span>
+
+<span class="comm"># Approve and implement</span>
+<span class="cmd">></span> <span class="key">Proceed with the plan</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Press <kbd style="padding:1px 6px;border-radius:3px;background:rgba(255,255,255,.1);font-size:.75rem;">Shift+Tab</kbd> to toggle plan mode on/off for all prompts.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3 — Command 2: /model -->
+  <section class="slide" data-index="3">
+    <span class="slide-num">02</span>
+    <span class="badge">Command 2</span>
+    <h2>/model — Select Your AI Model</h2>
+    <p class="subtitle">Switch between models mid-session based on task complexity — from fast daily coding to deep architectural reasoning.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>Auto mode</strong> — intelligently selects models based on system health; reduces rate limiting and latency.</li>
+          <li><strong>Claude Opus 4.5</strong> — complex architecture, difficult debugging, and nuanced refactoring tasks.</li>
+          <li><strong>Claude Sonnet 4.5</strong> — fast and cost-effective for day-to-day coding and routine tasks.</li>
+          <li><strong>GPT-5.2 Codex</strong> — excellent for code generation, code review, and straightforward implementations.</li>
+          <li><strong>Switch anytime</strong> — change models mid-session as task complexity changes.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-2);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># View and select available models</span>
+<span class="cmd">></span> <span class="key">/model</span>
+
+<span class="tag">Available models:</span>
+  <span class="val">● Auto</span>        <span class="comm">← recommended</span>
+  <span class="val">● Opus 4.5</span>    <span class="comm">← deep reasoning</span>
+  <span class="val">● Sonnet 4.5</span>  <span class="comm">← fast & efficient</span>
+  <span class="val">● Codex 5.2</span>   <span class="comm">← code generation</span>
+
+<span class="comm"># Switch to Opus for complex work</span>
+<span class="cmd">></span> <span class="key">/model</span> <span class="val">opus</span>
+<span class="tag">✓ Switched to Claude Opus 4.5</span>
+
+<span class="comm"># Switch to Sonnet for routine tasks</span>
+<span class="cmd">></span> <span class="key">/model</span> <span class="val">sonnet</span>
+<span class="tag">✓ Switched to Claude Sonnet 4.5</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Use Opus for architecture reviews, Sonnet for everyday work, and Codex as a second opinion on generated code.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4 — Command 3: /review -->
+  <section class="slide" data-index="4">
+    <span class="slide-num">03</span>
+    <span class="badge">Command 3</span>
+    <h2>/review — AI Code Review</h2>
+    <p class="subtitle">Get thorough code review assistance — catch bugs, security issues, and style violations before opening a PR.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>Multi-model review</strong> — use multiple models for comprehensive coverage of potential issues.</li>
+          <li><strong>Branch comparison</strong> — review changes against main or any target branch.</li>
+          <li><strong>Focus areas</strong> — direct the review to focus on bugs, security, performance, or style.</li>
+          <li><strong>Actionable feedback</strong> — get specific suggestions, not just high-level comments.</li>
+          <li><strong>Built-in sub-agent</strong> — /review runs as a dedicated sub-agent with its own context.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-4);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># Review current branch against main</span>
+<span class="cmd">></span> <span class="key">/review</span> <span class="val">Review changes in my
+  current branch against main. Focus on
+  potential bugs and security issues.</span>
+
+<span class="comm"># Multi-model review for thoroughness</span>
+<span class="cmd">></span> <span class="key">/review</span> <span class="val">Use Opus 4.5 and
+  Codex 5.2 to review changes against
+  `main`.</span>
+
+<span class="tag">🔍 Reviewing 12 changed files...</span>
+<span class="tag">   ⚠ SQL injection risk in user.ts:42</span>
+<span class="tag">   ⚠ Missing null check in api.ts:87</span>
+<span class="tag">   ✓ auth.ts looks good</span>
+<span class="tag">   💡 Consider adding error boundary</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Run /review before every PR to catch issues early. Combine with /plan for a complete code → review → commit workflow.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5 — Command 4: /delegate -->
+  <section class="slide" data-index="5">
+    <span class="slide-num">04</span>
+    <span class="badge">Command 4</span>
+    <h2>/delegate — Offload to Cloud</h2>
+    <p class="subtitle">Hand off tasks to Copilot's cloud agent — it creates a PR while you keep working locally.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>Async execution</strong> — the cloud agent works in the background while you continue coding.</li>
+          <li><strong>PR creation</strong> — the agent creates a pull request with the completed changes.</li>
+          <li><strong>Cross-repo capable</strong> — delegate changes to other repositories you have access to.</li>
+          <li><strong>Best for tangential work</strong> — documentation updates, refactoring separate modules, boilerplate.</li>
+          <li><strong>Requires GitHub sign-in</strong> — delegates to GitHub's server-side Copilot cloud agent.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-5);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># Delegate a task to cloud agent</span>
+<span class="cmd">></span> <span class="key">/delegate</span> <span class="val">Add dark mode support
+  to the settings page</span>
+
+<span class="tag">☁️  Sending to Copilot cloud agent...</span>
+<span class="tag">✓  Task accepted — PR incoming</span>
+
+<span class="comm"># Keep working locally while it runs</span>
+<span class="cmd">></span> <span class="val">Now let's fix the login bug...</span>
+
+<span class="comm"># Great for tangential tasks:</span>
+<span class="cmd">></span> <span class="key">/delegate</span> <span class="val">Update README with
+  new API endpoints</span>
+<span class="cmd">></span> <span class="key">/delegate</span> <span class="val">Add JSDoc comments
+  to all exported functions</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Use /delegate for tangential tasks and documentation. Keep core feature work and debugging local.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 6 — Command 5: /fleet -->
+  <section class="slide" data-index="6">
+    <span class="slide-num">05</span>
+    <span class="badge">Command 5</span>
+    <h2>/fleet — Parallel Task Execution</h2>
+    <p class="subtitle">Break large tasks into parallel subtasks executed by multiple sub-agents simultaneously — dramatically speed up big jobs.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>Parallel sub-agents</strong> — Copilot splits work into independent subtasks and runs them concurrently.</li>
+          <li><strong>Speed multiplier</strong> — large migrations, refactoring, and test generation complete much faster.</li>
+          <li><strong>Automatic coordination</strong> — sub-agents coordinate to avoid conflicts across files.</li>
+          <li><strong>Autonomous mode</strong> — combine with autopilot for fully autonomous parallel execution.</li>
+          <li><strong>Progress tracking</strong> — monitor each sub-agent's progress in real time.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-6);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># Parallelize a large migration</span>
+<span class="cmd">></span> <span class="key">/fleet</span> <span class="val">Migrate all class
+  components to functional components
+  with hooks</span>
+
+<span class="tag">🚀 Breaking into 4 parallel tasks:</span>
+<span class="tag">   Agent 1: UserProfile, UserSettings</span>
+<span class="tag">   Agent 2: Dashboard, Analytics</span>
+<span class="tag">   Agent 3: Auth, Login, Signup</span>
+<span class="tag">   Agent 4: Tests for all migrated</span>
+
+<span class="comm"># Parallelize test generation</span>
+<span class="cmd">></span> <span class="key">/fleet</span> <span class="val">Write unit tests for
+  all services in src/services/</span>
+
+<span class="tag">✓ All 4 agents completed successfully</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Use /fleet at the start of your prompt for any large-scale changes spanning many files.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 7 — Command 6: /context -->
+  <section class="slide" data-index="7">
+    <span class="slide-num">06</span>
+    <span class="badge">Command 6</span>
+    <h2>/context — Visualize Your Context</h2>
+    <p class="subtitle">See exactly how your context window is being used — system tokens, message history, and remaining free space.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>Token breakdown</strong> — see system/tools tokens, message history, and free space allocation.</li>
+          <li><strong>Buffer visibility</strong> — understand how much headroom remains for complex prompts.</li>
+          <li><strong>Infinite sessions</strong> — Copilot auto-compacts when context fills up, so you never lose work.</li>
+          <li><strong>Optimization signal</strong> — know when to run /compact or /clear for best results.</li>
+          <li><strong>Diagnostic tool</strong> — helps explain why responses may become less focused over long sessions.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-7);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># Check your context window usage</span>
+<span class="cmd">></span> <span class="key">/context</span>
+
+<span class="tag">📊 Context Window Usage</span>
+<span class="tag">━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="key">System & tools:</span>  <span class="val">18,240 tokens</span>
+<span class="key">Message history:</span> <span class="val">42,680 tokens</span>
+<span class="key">Free space:</span>      <span class="val">67,080 tokens</span>
+<span class="key">Buffer:</span>          <span class="val"> 4,000 tokens</span>
+<span class="tag">━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="key">Total capacity:</span>  <span class="val">128,000 tokens</span>
+<span class="key">Usage:</span>           <span class="val">47.6%</span>
+
+<span class="comm"># Plenty of room to keep going! 🎯</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> If context exceeds ~80%, consider running /compact or /clear to improve response quality.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8 — Command 7: /session -->
+  <section class="slide" data-index="8">
+    <span class="slide-num">07</span>
+    <span class="badge">Command 7</span>
+    <h2>/session — Session Management</h2>
+    <p class="subtitle">Inspect session state, checkpoints, files, and plans — your window into Copilot's working memory.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>/session</strong> — view current session information and metadata.</li>
+          <li><strong>/session checkpoints</strong> — list all compaction checkpoints with summaries.</li>
+          <li><strong>/session checkpoints N</strong> — view details of a specific checkpoint.</li>
+          <li><strong>/session files</strong> — list temporary artifacts created during the session.</li>
+          <li><strong>/session plan</strong> — view the current implementation plan if one exists.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-8);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># View current session info</span>
+<span class="cmd">></span> <span class="key">/session</span>
+<span class="tag">Session: a3f2-b8c1</span>
+<span class="tag">Model: Claude Opus 4.5</span>
+<span class="tag">Duration: 42 minutes</span>
+
+<span class="comm"># List checkpoints</span>
+<span class="cmd">></span> <span class="key">/session</span> <span class="val">checkpoints</span>
+<span class="tag">  1. Initial exploration (12 min)</span>
+<span class="tag">  2. Auth implementation (28 min)</span>
+
+<span class="comm"># View checkpoint details</span>
+<span class="cmd">></span> <span class="key">/session</span> <span class="val">checkpoints 2</span>
+
+<span class="comm"># View session files</span>
+<span class="cmd">></span> <span class="key">/session</span> <span class="val">files</span>
+
+<span class="comm"># View current plan</span>
+<span class="cmd">></span> <span class="key">/session</span> <span class="val">plan</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Session data is stored in <code style="font-size:.75rem;color:#c4b5fd;">~/.copilot/session-state/{id}/</code> — useful for auditing and sharing.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 9 — Command 8: /add-dir -->
+  <section class="slide" data-index="9">
+    <span class="slide-num">08</span>
+    <span class="badge">Command 8</span>
+    <h2>/add-dir — Multi-Repo Workflows</h2>
+    <p class="subtitle">Expand Copilot's access beyond the current directory — work across microservices, monorepos, and related projects.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>/add-dir &lt;path&gt;</strong> — grant Copilot access to an additional repository or folder.</li>
+          <li><strong>/list-dirs</strong> — view all currently accessible directories.</li>
+          <li><strong>Cross-repo changes</strong> — make coordinated changes across API, frontend, and shared libs.</li>
+          <li><strong>Parent directory trick</strong> — start <code style="color:#c4b5fd;">copilot</code> from a parent folder to access all child repos.</li>
+          <li><strong>Microservices friendly</strong> — ideal for API contract changes with client updates.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-9);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># Add additional repos to the session</span>
+<span class="cmd">></span> <span class="key">/add-dir</span> <span class="val">/home/me/projects/backend</span>
+<span class="cmd">></span> <span class="key">/add-dir</span> <span class="val">/home/me/projects/frontend</span>
+<span class="cmd">></span> <span class="key">/add-dir</span> <span class="val">/home/me/projects/shared-lib</span>
+
+<span class="comm"># View all accessible directories</span>
+<span class="cmd">></span> <span class="key">/list-dirs</span>
+<span class="tag">  1. /home/me/projects/api-gateway</span>
+<span class="tag">  2. /home/me/projects/backend</span>
+<span class="tag">  3. /home/me/projects/frontend</span>
+<span class="tag">  4. /home/me/projects/shared-lib</span>
+
+<span class="comm"># Or start from parent directory</span>
+<span class="cmd">$</span> <span class="key">cd</span> <span class="val">~/projects</span>
+<span class="cmd">$</span> <span class="key">copilot</span>
+<span class="comm"># Access all child repos automatically</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Use <code style="font-size:.75rem;color:#c4b5fd;">@/path/to/repo</code> in your prompts to reference specific repos when working across multiple.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 10 — Command 9: --allow-tool / --deny-tool -->
+  <section class="slide" data-index="10">
+    <span class="slide-num">09</span>
+    <span class="badge">Command 9</span>
+    <h2>--allow-tool &amp; --deny-tool</h2>
+    <p class="subtitle">Pre-configure fine-grained tool permissions — control exactly what Copilot can and cannot execute.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>CLI flags</strong> — pass <code style="color:#c4b5fd;">--allow-tool</code> and <code style="color:#c4b5fd;">--deny-tool</code> at launch to preconfigure permissions.</li>
+          <li><strong>Glob patterns</strong> — use wildcards like <code style="color:#c4b5fd;">shell(git:*)</code> or <code style="color:#c4b5fd;">shell(npm run:*)</code>.</li>
+          <li><strong>/reset-allowed-tools</strong> — reset all previously approved tools mid-session.</li>
+          <li><strong>Safety first</strong> — Copilot always asks before potentially destructive operations.</li>
+          <li><strong>Team policies</strong> — standardize permissions via scripts or shell profiles.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-10);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># Allow all git commands, deny push</span>
+<span class="cmd">$</span> <span class="key">copilot</span> \
+  <span class="val">--allow-tool='shell(git:*)'</span> \
+  <span class="val">--deny-tool='shell(git push)'</span>
+
+<span class="comm"># Common permission patterns</span>
+<span class="key">shell(git:*)</span>        <span class="comm"># All git cmds</span>
+<span class="key">shell(npm run:*)</span>    <span class="comm"># All npm scripts</span>
+<span class="key">shell(npm run test:*)</span><span class="comm"># npm test only</span>
+<span class="key">write</span>               <span class="comm"># Allow file writes</span>
+
+<span class="comm"># Reset permissions mid-session</span>
+<span class="cmd">></span> <span class="key">/reset-allowed-tools</span>
+<span class="tag">✓ All tool permissions reset</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Add allow/deny flags to your shell alias for consistent security across all sessions.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 11 — Command 10: /compact & /clear -->
+  <section class="slide" data-index="11">
+    <span class="slide-num">10</span>
+    <span class="badge">Command 10</span>
+    <h2>/compact &amp; /clear — Session Hygiene</h2>
+    <p class="subtitle">Keep your sessions focused and performant — compact history, clear context, or start fresh between unrelated tasks.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>/compact</strong> — manually trigger context compaction; summarizes history while preserving key info.</li>
+          <li><strong>/clear</strong> — reset context for the current session; ideal between unrelated tasks.</li>
+          <li><strong>/new</strong> — start a completely new session, preserving custom instructions.</li>
+          <li><strong>Auto-compaction</strong> — Copilot handles this automatically, but manual runs can help long sessions.</li>
+          <li><strong>Better responses</strong> — focused context produces higher quality, more relevant output.</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-3);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># Manually compact context</span>
+<span class="cmd">></span> <span class="key">/compact</span>
+<span class="tag">✓ Context compacted</span>
+<span class="tag">  Summarized 42 messages → 1 summary</span>
+<span class="tag">  Freed 38,000 tokens</span>
+
+<span class="comm"># Clear context between tasks</span>
+<span class="cmd">></span> <span class="key">/clear</span>
+<span class="tag">✓ Context cleared — ready for new task</span>
+
+<span class="comm"># Start a brand new session</span>
+<span class="cmd">></span> <span class="key">/new</span>
+<span class="tag">✓ New session started</span>
+
+<span class="comm"># Recommended workflow:</span>
+<span class="comm"># Task A → /clear → Task B → /clear</span>
+<span class="comm"># Like fresh conversations 💬</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Use /clear or /new between unrelated tasks — it's like starting a fresh conversation with a colleague.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 12 — Bonus: Recommended Workflow -->
+  <section class="slide" data-index="12">
+    <span class="slide-num">★</span>
+    <span class="badge">Bonus — Putting It All Together</span>
+    <h2>The Optimal Workflow</h2>
+    <p class="subtitle">Combine these commands into a powerful explore → plan → code → review → commit cycle for maximum productivity.</p>
+    <div class="content-wrap">
+      <div class="content-left">
+        <ul class="feature-list">
+          <li><strong>1. Explore</strong> — <code style="color:#c4b5fd;">Read the auth files but don't write code yet</code></li>
+          <li><strong>2. Plan</strong> — <code style="color:#c4b5fd;">/plan Implement password reset flow</code></li>
+          <li><strong>3. Review plan</strong> — check the plan, suggest modifications</li>
+          <li><strong>4. Implement</strong> — <code style="color:#c4b5fd;">Proceed with the plan</code></li>
+          <li><strong>5. Verify</strong> — <code style="color:#c4b5fd;">Run the tests and fix any failures</code></li>
+          <li><strong>6. Review</strong> — <code style="color:#c4b5fd;">/review Focus on security and bugs</code></li>
+          <li><strong>7. Commit</strong> — <code style="color:#c4b5fd;">Commit with a descriptive message</code></li>
+          <li><strong>8. Clean up</strong> — <code style="color:#c4b5fd;">/clear</code> to start next task fresh</li>
+        </ul>
+      </div>
+      <div class="content-right">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-1);border-radius:18px 18px 0 0;"></div>
+        <div class="code-block">
+<span class="comm"># ① Explore the codebase</span>
+<span class="cmd">></span> <span class="val">Read the authentication files but
+  don't write code yet</span>
+
+<span class="comm"># ② Create a plan</span>
+<span class="cmd">></span> <span class="key">/plan</span> <span class="val">Implement password reset flow</span>
+
+<span class="comm"># ③ Review & approve plan, then implement</span>
+<span class="cmd">></span> <span class="val">Proceed with the plan</span>
+
+<span class="comm"># ④ Verify with tests</span>
+<span class="cmd">></span> <span class="val">Run the tests and fix any failures</span>
+
+<span class="comm"># ⑤ AI code review</span>
+<span class="cmd">></span> <span class="key">/review</span> <span class="val">Focus on security issues</span>
+
+<span class="comm"># ⑥ Commit and clean up</span>
+<span class="cmd">></span> <span class="val">Commit these changes</span>
+<span class="cmd">></span> <span class="key">/clear</span>
+        </div>
+        <div class="tip-box">
+          <strong>💡 Pro Workflow:</strong> Explore → /plan → Implement → /review → Commit → /clear. Rinse and repeat!
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 13 — Closing -->
+  <section class="slide closing" data-index="13">
+    <span class="badge">Workshop Complete</span>
+    <h1>Master Your Terminal<br>with Copilot CLI</h1>
+    <p class="subtitle">10 commands to transform your command-line workflow — plan, review, delegate, and collaborate with AI at the speed of thought.</p>
+    <div class="closing-pills">
+      <span style="background:var(--gradient-1);">/plan</span>
+      <span style="background:var(--gradient-2);">/model</span>
+      <span style="background:var(--gradient-4);">/review</span>
+      <span style="background:var(--gradient-5);">/delegate</span>
+      <span style="background:var(--gradient-6);">/fleet</span>
+      <span style="background:var(--gradient-7);">/context</span>
+      <span style="background:var(--gradient-8);">/session</span>
+      <span style="background:var(--gradient-9);">/add-dir</span>
+      <span style="background:var(--gradient-10);">--allow-tool</span>
+      <span style="background:var(--gradient-3);">/compact</span>
+    </div>
+    <p style="margin-top:28px;font-size:.88rem;color:var(--text-dim);">
+      Reference: <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices" style="color:var(--accent-light);text-decoration:none;">docs.github.com — Copilot CLI Best Practices</a>
+    </p>
+  </section>
+
+</div>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="nav-bar">
+  <button class="btn-prev" id="prevBtn" disabled>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Previous
+  </button>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span class="counter" id="counter">1 / 14</span>
+    <div class="dots" id="dots"></div>
+  </div>
+  <button class="btn-next" id="nextBtn">
+    Next
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counter = document.getElementById('counter');
+  const dotsWrap = document.getElementById('dots');
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('span');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  });
+
+  function goTo(index) {
+    if (index < 0 || index >= total) return;
+    slides[current].classList.remove('active');
+    dotsWrap.children[current].classList.remove('active');
+    current = index;
+    slides[current].classList.add('active');
+    dotsWrap.children[current].classList.add('active');
+    counter.textContent = `${current + 1} / ${total}`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+  });
+</script>
+
+</body>
+</html>
